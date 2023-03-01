@@ -9,7 +9,7 @@ class TodoRepository
     private Todo $todo;
 	public function __construct()
 	{
-		$this->todo = new Todo(['title']);
+		$this->todo = new Todo();
 	}
     public function getAll() : Object
     {
@@ -28,17 +28,15 @@ class TodoRepository
         $dataBaru->save();
         return $dataBaru->fresh();
     }
-    // public function store($data)
-    // {
-    //     $todo = Todo::create([
-    //         'title' => $data['title']
-    //     ]);
-    //     return $todo;
-    // }
-    public function delete(string $todoId)
+    public function update($data, $id)
+    {
+        $todo = Todo::find($id);
+        $todo->update($data);
+    }
+    public function delete($id)
 	{
-        $id = Todo::destroy($todoId);
-		return $id;
+        $todo = Todo::find($id);
+		$todo->delete();
 	}
     public function save(Todo $todo, array $data)
     {

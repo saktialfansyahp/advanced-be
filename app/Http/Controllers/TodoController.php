@@ -13,6 +13,20 @@ class TodoController extends Controller
 		$this->todoService = new TodoService();
 	}
 
+    public function byId(Request $request)
+    {
+        $id = $request->id;
+        try {
+            $result = $this->todoService->getById($id);
+        } catch (Exception $e) {
+            $result = [
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
+        }
+        return response()->json($result);
+    }
+
 	public function displayTodo()
 	{
 		try {
@@ -28,56 +42,41 @@ class TodoController extends Controller
 
 	public function createTodo(Request $request)
 	{
-		$request->validate([
-			'title'=>'required|string|min:3'
-		]);
+        $data = $request->only(['title']);
 
-		$data = [
-			'title'=>$request->post('title'),
-		];
+        $result = ['status' => 201];
 
-		$dataSaved = [
-			'title'=>$data['title'],
-			'created_at'=>time()
-		];
+        try {
+            $result['data'] = $this->todoService->store($data);
+        } catch (Exception $e) {
+            $result = [
+                'status' =>'422',
+                'error' => $e->getMessage(),
+            ];
+        }
+        return response()->json($result, $result['status']);
+	}
 
-		$id = $this->todoService->store($dataSaved);
+	public function updateTodo(Request $request, $id)
+	{
+		$data = $request->all();
 
-		return response()->json($id);
+        $updatedTodo = $this->todoService->update($id, $data);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Todo updated successfully',
+            'data' => $updatedTodo,
+        ], 200);
 	}
 
 
-	public function updateTodo(Request $request)
+	public function deleteTodo($id)
 	{
-		$request->validate([
-			'id'=>'required|string',
-			'title'=>'string',
-		]);
-
-		$todoId = $request->post('id');
-		$titl = $request->post('title');
-		$todo = $this->todoService->getById($todoId);
-
-		$todo = $this->todoService->update($todo, $titl);
-
-		$todo = $this->todoService->getById($todoId);
-
-		return response()->json($todo);
-	}
-
-
-	public function deleteTodo(Request $request)
-	{
-		$request->validate([
-			'id'=>'required'
-		]);
-
-		$todoId = $request->id;
-
-        $todo = $this->todoService->deleteTodo($todoId);
+        $todo = $this->todoService->delete($id);
 
 		return response()->json([
-			'message'=> 'Success delete todo '.$todoId
+			'message'=> 'Success delete todo '.$id
 		]);
 	}
 }

@@ -32,7 +32,7 @@ Route::group([
         Route::get('data', [AuthController::class, 'data']);
         Route::get('displayTodo', [TodoController::class, 'displayTodo']);
         Route::post('createTodo', [TodoController::class, 'createTodo']);
-        Route::post('updateTodo', [TodoController::class, 'updateTodo']);
-        Route::post('deleteTodo', [TodoController::class, 'deleteTodo']);
+        Route::post('updateTodo/{id}', [TodoController::class, 'updateTodo']);
+        Route::post('deleteTodo/{id}', [TodoController::class, 'deleteTodo']);
     });
 });

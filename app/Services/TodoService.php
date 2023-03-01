@@ -33,21 +33,30 @@ class TodoService{
         $result = $this->todoRepository->store($data);
         return $result;
     }
-    public function update($id, array $data)
+    public function update($id, $data)
     {
+        $validator = Validator::make($data, [
+            'title' => 'required'
+        ]);
+        if ($validator->fails()){
+            throw new InvalidArgumentException($validator->errors()->first());
+        }
         $todo = $this->todoRepository->getById($id);
-        $todo = $this->todoRepository->save($todo, $data);
-        return $todo;
+        if (!$todo) {
+            return response()->json(['error' => 'Todo not found'], 404);
+        }
+        $this->todoRepository->update($data, $id);
+        return $todo->fresh();
     }
-    public function deleteTodo(string $todoId)
+    public function delete($id)
     {
-        if(!$todoId)
+        if(!$id)
 		{
 			return response()->json([
-				"message"=> "Task ".$todoId." tidak ada"
-			], 401);
+				'error' => 'Todo not found'
+			], 404);
 		}
-        $task = $this->todoRepository->delete($todoId);
+        $task = $this->todoRepository->delete($id);
         return $task;
     }
 }
