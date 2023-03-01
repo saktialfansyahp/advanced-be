@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use Illuminate\Http\Request;
 use App\Services\TodoService;
 
@@ -14,8 +15,15 @@ class TodoController extends Controller
 
 	public function displayTodo()
 	{
-		$todos = $this->todoService->getAll();
-		return response()->json($todos);
+		try {
+            $result = $this->todoService->getAll();
+        } catch (Exception $e) {
+            $result = [
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
+        }
+        return response()->json($result);
 	}
 
 	public function createTodo(Request $request)

@@ -21,13 +21,20 @@ class TodoRepository
 		$task = Todo::find($id);
 		return $task;
 	}
-    public function store($data)
+    public function store($data) : Object
     {
-        $todo = Todo::create([
-            'title' => $data['title']
-        ]);
-        return $todo;
+        $dataBaru = new $this->todo;
+        $dataBaru->title = $data['title'];
+        $dataBaru->save();
+        return $dataBaru->fresh();
     }
+    // public function store($data)
+    // {
+    //     $todo = Todo::create([
+    //         'title' => $data['title']
+    //     ]);
+    //     return $todo;
+    // }
     public function delete(string $todoId)
 	{
         $id = Todo::destroy($todoId);

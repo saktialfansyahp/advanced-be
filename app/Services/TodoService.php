@@ -22,7 +22,7 @@ class TodoService{
 		$task = $this->todoRepository->getById($id);
 		return $task;
 	}
-    public function store($data)
+    public function store($data) : Object
     {
         $validator = Validator::make($data, [
             'title' => 'required'
