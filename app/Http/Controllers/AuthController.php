@@ -17,9 +17,13 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
+            'firstname' => 'required|string|max:255',
+            'lastname' => 'required|string|max:255',
+            'username' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
+            'address' => 'required|string|max:255',
+            'role' => 'required|string|in:admin,customer',
         ]);
 
         // Return an error response if the validation fails
@@ -29,16 +33,23 @@ class AuthController extends Controller
 
         // Create a new user record
         $user = User::create([
-            'name' => $request->name,
+            'firstname' => $request->firstname,
+            'lastname' => $request->lastname,
+            'username' => $request->username,
             'email' => $request->email,
             'password' => bcrypt($request->password),
+            'address' => $request->address,
+            'role' => $request->role,
         ]);
 
         // Generate a JWT token for the user
         $token = JWTAuth::fromUser($user);
-
+        $data = $user;
         // Return a success response with the JWT token
-        return response()->json(['token' => $token], 201);
+        return response()->json([
+            'data' => $data,
+            'token' => $token,
+        ], 201);
     }
     public function login(){
         $credentials = request(['email', 'password']);
@@ -46,11 +57,12 @@ class AuthController extends Controller
         if(!$token){
             return response()->json(['error'=>'Unauthorized'], 401);
         }
+        $data = $this->authService->getAll();
+        $token = JWTAuth::attempt($credentials, ['expires_in' => 3600]);
 
         return response()->json([
+            'data' => $data,
             'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => JWTAuth::factory()->getTTL() * 60
         ]);
     }
     public function logout(){

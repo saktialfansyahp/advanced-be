@@ -2,8 +2,9 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\TodoController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\TodoController;
+use App\Http\Controllers\PelangganController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,5 +35,10 @@ Route::group([
         Route::post('createTodo', [TodoController::class, 'createTodo']);
         Route::post('updateTodo/{id}', [TodoController::class, 'updateTodo']);
         Route::post('deleteTodo/{id}', [TodoController::class, 'deleteTodo']);
+        Route::get('displayPelanggan', [PelangganController::class, 'displayPelanggan']);
+        Route::post('createPelanggan', [PelangganController::class, 'createPelanggan']);
+        Route::get('getPelanggan/{id}', [PelangganController::class, 'byId']);
+        Route::post('updatePelanggan/{id}', [PelangganController::class, 'updatePelanggan']);
+        Route::post('deletePelanggan/{id}', [PelangganController::class, 'deletePelanggan']);
     });
 });

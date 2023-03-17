@@ -10,20 +10,32 @@ class AuthRepository{
 	public function __construct()
 	{
 		$this->user = new User([
-            'name',
+            'firstname',
+            'lastname',
+            'username',
             'email',
-            'password'
+            'password',
+            'address',
+            'role',
         ]);
 	}
     public function register($auth){
-        $name = $auth['name'];
+        $firstname = $auth['firstname'];
+        $lastname = $auth['lastname'];
+        $username = $auth['username'];
         $email = $auth['email'];
         $password = $auth['password'];
+        $address = $auth['address'];
+        $role = $auth['role'];
 
         $auth = User::create([
-            'name' => $name,
+            'firstname' => $firstname,
+            'lastname' => $lastname,
+            'username' => $username,
             'email' => $email,
-            'password' => bcrypt('password'),
+            'password' => bcrypt($password),
+            'address' => $address,
+            'role' => $role,
         ]);
 
         // Generate a JWT token for the user
