@@ -55,7 +55,7 @@ class AuthController extends Controller
         $credentials = request(['email', 'password']);
         $token = auth()->attempt($credentials);
         if(!$token){
-            return response()->json(['error'=>'Unauthorized'], 401);
+            return response()->json(['error'=>'Invalid Email or Password'], 401);
         }
         $data = $this->authService->getAll();
         $token = JWTAuth::attempt($credentials, ['expires_in' => 3600]);

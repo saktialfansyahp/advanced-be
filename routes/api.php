@@ -4,7 +4,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TodoController;
+use App\Http\Controllers\EmailController;
 use App\Http\Controllers\PelangganController;
+use App\Http\Controllers\TransaksiController;
+use App\Http\Controllers\WhatsappController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,5 +43,14 @@ Route::group([
         Route::get('getPelanggan/{id}', [PelangganController::class, 'byId']);
         Route::post('updatePelanggan/{id}', [PelangganController::class, 'updatePelanggan']);
         Route::post('deletePelanggan/{id}', [PelangganController::class, 'deletePelanggan']);
+        Route::get('displayTransaksi', [TransaksiController::class, 'displayTransaksi']);
+        Route::post('createTransaksi', [TransaksiController::class, 'createTransaksi']);
+        Route::get('getTransaksi/{id}', [TransaksiController::class, 'byId']);
+        Route::post('updateTransaksi/{id}', [TransaksiController::class, 'updateTransaksi']);
+        Route::post('deleteTransaksi/{id}', [TransaksiController::class, 'deleteTransaksi']);
+        Route::get('/send', [EmailController::class,'index']);
+        Route::post('/send', [EmailController::class,'index']);
+        Route::post('/whatsapp', [WhatsappController::class, 'store']);
+    	// Route::post('/send/mail/feedback', [EmailController::class, 'send_feedback']);
     });
 });
