@@ -31,9 +31,9 @@ Route::group([
     Route::group([
         'middleware' => 'auth:api'
     ], function(){
+        Route::get('data', [AuthController::class, 'data']);
         Route::post('logout', [AuthController::class, 'logout']);
         Route::post('refresh', [AuthController::class, 'refresh']);
-        Route::get('data', [AuthController::class, 'data']);
         Route::get('displayTodo', [TodoController::class, 'displayTodo']);
         Route::post('createTodo', [TodoController::class, 'createTodo']);
         Route::post('updateTodo/{id}', [TodoController::class, 'updateTodo']);
