@@ -3,6 +3,8 @@
 namespace App\Repositories;
 
 use App\Models\User;
+use App\Models\Pelanggan;
+use App\Services\PelangganService;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthRepository{
@@ -44,6 +46,10 @@ class AuthRepository{
     public function getAll()
     {
         $auth = auth()->user();
+        return $auth;
+    }
+    public function getuser(){
+        $auth = User::all();
         return $auth;
     }
     public function logout(){

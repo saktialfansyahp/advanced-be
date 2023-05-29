@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Pelanggan;
 use Illuminate\Http\Request;
+use App\Services\AuthService;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Validator;
-use App\Services\AuthService;
 
 class AuthController extends Controller
 {
@@ -24,6 +25,10 @@ class AuthController extends Controller
             'password' => 'required|string|min:6|confirmed',
             'address' => 'required|string|max:255',
             'role' => 'required|string|in:admin,customer',
+            'kota' => 'required|string|max:255',
+            'status' => 'required',
+            'no_telp' => 'required',
+            'jenis' => 'required',
         ]);
 
         // Return an error response if the validation fails
@@ -40,6 +45,14 @@ class AuthController extends Controller
             'password' => bcrypt($request->password),
             'address' => $request->address,
             'role' => $request->role,
+        ]);
+
+        $data = Pelanggan::create([
+            'user_id' => $user->id,
+            'kota' => $request->kota,
+            'status' => $request->status,
+            'no_telp' => $request->no_telp,
+            'jenis' => $request->jenis,
         ]);
 
         // Generate a JWT token for the user
@@ -82,5 +95,44 @@ class AuthController extends Controller
     public function data(){
         $auth = $this->authService->getAll();
 		return response()->json($auth);
+    }
+    public function dataUser(){
+        $auth = $this->authService->getUser();
+		return response()->json($auth);
+    }
+    public function update(Request $request, $id){
+
+        $data = [
+            'firstname' => $request->input('firstname'),
+            'lastname' => $request->input('lastname'),
+            'username' => $request->input('username'),
+            'address' => $request->input('address'),
+            'email' => $request->input('email'),
+            'role' => $request->input('role')
+        ];
+
+        $data2 = [
+            'no_telp' => $request->input('pelanggan.no_telp'),
+            'kota' => $request->input('pelanggan.kota'),
+            'status' => $request->input('pelanggan.status'),
+            'jenis' => $request->input('pelanggan.jenis'),
+        ];
+
+        $users = User::find($id);
+        $users->update($data);
+
+        $pelanggan = Pelanggan::where('user_id', $id)->first();
+        $pelanggan->update($data2);
+
+        return response()->json([
+            'users' => $users,
+            'pelanggan' => $pelanggan
+        ]);
+
+
+    }
+    public function destroy($id){
+        $user = User::find($id);
+        $user->delete();
     }
 }

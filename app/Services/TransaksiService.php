@@ -31,6 +31,7 @@ class TransaksiService{
             'jumlah_tagihan' => 'required',
             'status_tagihan' => 'required',
             'pelanggan_id' => 'required',
+            'user_id' => 'required',
         ]);
         if ($validator->fails()){
             throw new InvalidArgumentException($validator->errors()->first());
@@ -41,12 +42,7 @@ class TransaksiService{
     public function update($id, $data)
     {
         $validator = Validator::make($data, [
-            'no_tagihan' => 'required',
-            'produk' => 'required',
-            'jatuh_tempo' => 'required',
-            'jumlah_tagihan' => 'required',
             'status_tagihan' => 'required',
-            'pelanggan_id' => 'required',
         ]);
         if ($validator->fails()){
             throw new InvalidArgumentException($validator->errors()->first());

@@ -5,9 +5,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TodoController;
 use App\Http\Controllers\EmailController;
+use App\Http\Controllers\CommandController;
+use App\Http\Controllers\WhatsappController;
 use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\TransaksiController;
-use App\Http\Controllers\WhatsappController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,12 +29,17 @@ Route::group([
 ], function(){
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login', [AuthController::class, 'login']);
+    Route::post('command', [CommandController::class, 'runCommand']);
+    Route::get('/dom', [EmailController::class,'sendInvoice']);
     Route::group([
         'middleware' => 'auth:api'
     ], function(){
         Route::get('data', [AuthController::class, 'data']);
+        Route::get('dataUser', [AuthController::class, 'dataUser']);
         Route::post('logout', [AuthController::class, 'logout']);
         Route::post('refresh', [AuthController::class, 'refresh']);
+        Route::post('destroy/{id}', [AuthController::class, 'destroy']);
+        Route::post('update/{id}', [AuthController::class, 'update']);
         Route::get('displayTodo', [TodoController::class, 'displayTodo']);
         Route::post('createTodo', [TodoController::class, 'createTodo']);
         Route::post('updateTodo/{id}', [TodoController::class, 'updateTodo']);
@@ -48,9 +54,10 @@ Route::group([
         Route::get('getTransaksi/{id}', [TransaksiController::class, 'byId']);
         Route::post('updateTransaksi/{id}', [TransaksiController::class, 'updateTransaksi']);
         Route::post('deleteTransaksi/{id}', [TransaksiController::class, 'deleteTransaksi']);
-        Route::get('/send', [EmailController::class,'index']);
+        Route::post('/pdf', [EmailController::class,'pdf']);
         Route::post('/send', [EmailController::class,'index']);
         Route::post('/whatsapp', [WhatsappController::class, 'store']);
+        Route::post('/lunas', [WhatsappController::class, 'lunas']);
     	// Route::post('/send/mail/feedback', [EmailController::class, 'send_feedback']);
     });
 });

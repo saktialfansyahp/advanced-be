@@ -17,6 +17,11 @@ class AuthService{
         $auth = $this->authRepository->getAll();
         return $auth;
     }
+    public function getUser()
+    {
+        $auth = $this->authRepository->getUser();
+        return $auth;
+    }
     public function logout(){
         $auth = $this->authRepository->logout();
         return $auth;

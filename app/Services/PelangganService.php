@@ -25,13 +25,11 @@ class PelangganService{
     public function store($data) : Object
     {
         $validator = Validator::make($data, [
-            'name' => 'required',
             'no_telp' => 'required',
             'kota' => 'required',
-            'alamat' => 'required',
-            'email' => 'required',
             'status' => 'required',
             'jenis' => 'required',
+            'user_id' => 'required'
         ]);
         if ($validator->fails()){
             throw new InvalidArgumentException($validator->errors()->first());

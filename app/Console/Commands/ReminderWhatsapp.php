@@ -4,21 +4,18 @@ namespace App\Console\Commands;
 
 use Exception;
 use Carbon\Carbon;
-use App\Mail\SendMail;
 use App\Models\Transaksi;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Mail;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Log;
 
-class ReminderEmails extends Command
+class ReminderWhatsapp extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'reminder:email';
+    protected $signature = 'reminder:whatsapp';
 
     /**
      * The console command description.
@@ -34,8 +31,6 @@ class ReminderEmails extends Command
      */
     public function handle()
     {
-        $data["title"] = "From PT.Disty Teknologi Indonesia";
-        $data["body"] = "This is Demo";
 
         $today = Carbon::today();
         $nextThreeDays = $today->addDays(3);
@@ -49,46 +44,53 @@ class ReminderEmails extends Command
             ->with('user')
             ->get();
 
-
-            // $transaksi = Transaksi::where('jatuh_tempo', Carbon::today())->where('status_tagihan', 'Belum Bayar')->with('pelanggan')->get();
+        $curl = curl_init();
         try {
             foreach ($transaksi as $trx) {
                 $data["email"] = $trx->user->email;
                 $data["firstname"] = $trx->user->firstname;
                 $data["lastname"] = $trx->user->lastname;
                 $data["address"] = $trx->user->address;
-                $data["no_tagihan"] = $trx->no_tagihan;
+                $data["no_telp"] = $trx->pelanggan->no_telp;
                 $data["produk"] = $trx->produk;
                 $data["jumlah_tagihan"] = $trx->jumlah_tagihan;
                 $data["jatuh_tempo"] = $trx->jatuh_tempo;
 
-                $pdf = PDF::loadView('emails.invoice', $data);
-                $pdf->setPaper('A4', 'landscape');
 
-                $mail = Mail::send('emails.mail', $data, function($message) use ($data, $pdf) {
-                    $message->to($data["email"], $data["firstname"])
-                    ->subject($data["title"])
-                    ->attachData($pdf->output(), "Invoice.pdf");
-                });
-                Log::info(json_encode($mail));
-                Log::info(json_encode($transaksi));
+                $firstname = $data["firstname"];
+                $lastname = $data["lastname"];
+                $pesan = "Halo {$firstname} {$lastname},\n\nTerima kasih telah melunasi tagihan Anda. Kami mengapresiasi kerjasama Anda dalam melakukan pembayaran tepat waktu.\n\nTerima kasih dan semoga harimu menyenangkan.";
+
+
+                curl_setopt_array($curl, array(
+                    CURLOPT_URL => 'https://api.fonnte.com/send',
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_ENCODING => '',
+                    CURLOPT_MAXREDIRS => 10,
+                    CURLOPT_TIMEOUT => 0,
+                    CURLOPT_FOLLOWLOCATION => true,
+                    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                    CURLOPT_CUSTOMREQUEST => 'POST',
+                    CURLOPT_POSTFIELDS => array(
+                        'target' => $data["no_telp"],
+                        'message' => $pesan,
+                        'delay' => '2',
+                        'countryCode' => '62', //optional
+                    ),
+                    CURLOPT_HTTPHEADER => array(
+                        'Authorization: YHGJYEVA4wjNZzFpHCkm' //change TOKEN to your actual token
+                    ),
+                ));
+
             }
+            $response = curl_exec($curl);
+            Log::info(json_encode($response));
+            curl_close($curl);
+            echo $response;
         } catch (Exception $e) {
             //Give response message error if failed to send email
             Log::info($e);
             response()->json([$e->getMessage()]);
         }
-
-        // foreach ($transaksi as $t) {
-        //     $data = array(
-        //         'subject'   => $t->subject,
-        //         'no_tagihan'=> $t->no_tagihan,
-        //         'email'     => $t->pelanggan->email,
-        //         'name'      => $t->pelanggan->name,
-        //         //Send Request is send_feedback
-        //         'request'   => 'send'
-        //     );
-
-        // }
     }
 }

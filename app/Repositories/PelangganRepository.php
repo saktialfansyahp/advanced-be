@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Models\User;
 use App\Models\Pelanggan;
 
 class PelangganRepository
@@ -13,24 +14,22 @@ class PelangganRepository
 	}
     public function getAll() : Object
     {
-        $pelanggan = Pelanggan::get();
+        $pelanggan = Pelanggan::with('user')->get();
         return $pelanggan;
     }
     public function getById($id)
 	{
-		$task = Pelanggan::find($id);
+		$task = User::with('pelanggan')->find($id);
 		return $task;
 	}
     public function store($data) : Object
     {
         $dataBaru = new $this->pelanggan;
-        $dataBaru->name = $data['name'];
         $dataBaru->no_telp = $data['no_telp'];
         $dataBaru->kota = $data['kota'];
-        $dataBaru->alamat = $data['alamat'];
-        $dataBaru->email = $data['email'];
         $dataBaru->status = $data['status'];
         $dataBaru->jenis = $data['jenis'];
+        $dataBaru->user_id = $data['user_id'];
         $dataBaru->save();
         return $dataBaru->fresh();
     }
@@ -41,8 +40,8 @@ class PelangganRepository
     }
     public function delete($id)
 	{
-        $pelanggan = Pelanggan::find($id);
-		$pelanggan->delete();
+        $user = User::find($id);
+		$user->delete();
 	}
     public function save(Pelanggan $pelanggan, array $data)
     {

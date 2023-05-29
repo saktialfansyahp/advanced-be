@@ -8,6 +8,9 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
+
 
 class SendMail extends Mailable
 {
@@ -57,6 +60,19 @@ class SendMail extends Mailable
     // public function attachments()
     // {
     //     return [];
+    // }
+    // public function build()
+    // {
+    //     $pdf = PDF::loadView('emails.index', $this->data);
+
+    //     return $this->from('pegaxus81@gmail.com', 'sakti alfansyah putra')
+    //         ->to($this->data['email'])
+    //         ->subject($this->data['subject'])
+    //         ->view('emails.index')
+    //         ->with('data', $this->data)
+    //         ->attachData($pdf->output(), 'invoice.pdf', [
+    //             'mime' => 'application/pdf',
+    //         ]);
     // }
     public function build()
     {

@@ -18,3 +18,4 @@ Route::get('/', function () {
     return view('welcome');
 });
 Route::get('/send', [EmailController::class,'mail']);
+Route::get('/invoice', [EmailController::class,'invoice']);

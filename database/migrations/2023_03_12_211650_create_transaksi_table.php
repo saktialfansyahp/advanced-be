@@ -20,7 +20,8 @@ return new class extends Migration
             $table->date('jatuh_tempo');
             $table->string('jumlah_tagihan');
             $table->string('status_tagihan');
-            $table->foreignId('pelanggan_id')->constrained('pelanggan');
+            $table->foreignId('pelanggan_id')->constrained('pelanggan')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

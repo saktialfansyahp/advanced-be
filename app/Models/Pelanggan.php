@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\User;
 use App\Models\Transaksi;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,14 +14,17 @@ class pelanggan extends Model
     protected $table = 'pelanggan';
 
     protected $fillable = [
-        'name',
         'no_telp',
         'kota',
-        'alamat',
-        'email',
         'status',
         'jenis',
+        'user_id'
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function transaksi()
     {

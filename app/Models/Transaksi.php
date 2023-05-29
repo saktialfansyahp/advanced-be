@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\User;
 use App\Models\Pelanggan;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,10 +20,15 @@ class Transaksi extends Model
         'jumlah_tagihan',
         'status_tagihan',
         'pelanggan_id',
+        'user_id',
     ];
 
     public function pelanggan()
     {
         return $this->belongsTo(Pelanggan::class);
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }
