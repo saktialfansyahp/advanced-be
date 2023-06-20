@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use App\Models\User;
+use App\Models\Produk;
 use App\Models\Pelanggan;
+use App\Models\Transaksiproduk;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -15,7 +17,6 @@ class Transaksi extends Model
 
     protected $fillable = [
         'no_tagihan',
-        'produk',
         'jatuh_tempo',
         'jumlah_tagihan',
         'status_tagihan',
@@ -30,5 +31,9 @@ class Transaksi extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+    public function transaksi_produk()
+    {
+        return $this->hasMany(Transaksiproduk::class);
     }
 }

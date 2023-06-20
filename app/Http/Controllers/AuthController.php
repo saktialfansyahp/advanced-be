@@ -25,10 +25,6 @@ class AuthController extends Controller
             'password' => 'required|string|min:6|confirmed',
             'address' => 'required|string|max:255',
             'role' => 'required|string|in:admin,customer',
-            'kota' => 'required|string|max:255',
-            'status' => 'required',
-            'no_telp' => 'required',
-            'jenis' => 'required',
         ]);
 
         // Return an error response if the validation fails
@@ -47,13 +43,22 @@ class AuthController extends Controller
             'role' => $request->role,
         ]);
 
-        $data = Pelanggan::create([
-            'user_id' => $user->id,
-            'kota' => $request->kota,
-            'status' => $request->status,
-            'no_telp' => $request->no_telp,
-            'jenis' => $request->jenis,
-        ]);
+        if($request->role == 'customer'){
+            $validator = Validator::make($request->all(), [
+            'kota' => 'required|string|max:255',
+            'status' => 'required',
+            'no_telp' => 'required',
+            'jenis' => 'required',
+            ]);
+
+            $data = Pelanggan::create([
+                'user_id' => $user->id,
+                'kota' => $request->kota,
+                'status' => $request->status,
+                'no_telp' => $request->no_telp,
+                'jenis' => $request->jenis,
+            ]);
+        }
 
         // Generate a JWT token for the user
         $token = JWTAuth::fromUser($user);

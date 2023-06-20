@@ -17,7 +17,14 @@ return new class extends Migration
             $table->id();
             $table->string('nama_produk');
             $table->string('deskripsi');
+            $table->string('harga');
+            $table->timestamps();
+        });
+        Schema::create('transaksi_produk', function (Blueprint $table) {
+            $table->id();
             $table->foreignId('transaksi_id')->constrained('transaksi')->onDelete('cascade');
+            $table->foreignId('produk_id')->constrained('produk')->onDelete('cascade');
+            $table->integer('quantity');
             $table->timestamps();
         });
     }

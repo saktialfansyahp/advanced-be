@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Pelanggan;
 use App\Models\Transaksi;
+use App\Models\Transaksiproduk;
 
 class TransaksiRepository
 {
@@ -14,9 +15,10 @@ class TransaksiRepository
 	}
     public function getAll() : Object
     {
-        $pelanggan = Transaksi::with('pelanggan')->get();
-        $user = Transaksi::with('pelanggan')->with('user')->get();
-        $data = $pelanggan->merge($user);
+        // $pelanggan = Transaksi::with('pelanggan')->get();
+        $produk = Transaksiproduk::with('produk')->get();
+        $data = Transaksi::with('pelanggan')->with('user')->with('transaksi_produk.produk')->get();
+        // $data = $pelanggan->merge($user);
         $data = $data->sortBy(function ($item) {
         $number = substr($item->no_tagihan, 1);
             return intval($number);

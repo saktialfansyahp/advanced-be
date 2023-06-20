@@ -19,3 +19,4 @@ Route::get('/', function () {
 });
 Route::get('/send', [EmailController::class,'mail']);
 Route::get('/invoice', [EmailController::class,'invoice']);
+Route::get('/p', [EmailController::class,'remind']);

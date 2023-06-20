@@ -160,12 +160,12 @@
         <div id="logo">
             <img src="logo.png">
         </div>
-        <h1>{{ $no_tagihan }}</h1>
+        <h1>{{ $data['no_tagihan'] }}</h1>
         <div id="project">
-            <div><span>CLIENT</span> {{ $firstname }} {{ $lastname }}</div>
-            <div><span>ADDRESS</span> {{ $address }}</div>
-            <div><span>EMAIL</span> <a href={{ $email }}>{{ $email }}</a></div>
-            <div><span>DUE DATE</span> {{ $jatuh_tempo }}</div>
+            <div><span>CLIENT</span> {{ $data['firstname'] }} {{ $data['lastname'] }}</div>
+            <div><span>ADDRESS</span> {{ $data['address'] }}</div>
+            <div><span>EMAIL</span> <a href={{ $data['email'] }}>{{ $data['email'] }}</a></div>
+            <div><span>DUE DATE</span> {{ $data['jatuh_tempo'] }}</div>
         </div>
     </header>
     <main>
@@ -180,18 +180,18 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($produk as $produks)
+                @foreach ($data['produk'] as $produks)
                     <tr>
                         <td class="service">{{ $produks['produk']['nama_produk'] }}</td>
                         <td class="desc">{{ $produks['produk']['deskripsi'] }}</td>
                         <td class="service">{{ $produks['produk']['harga'] }}</td>
                         <td class="service">{{ $produks['quantity'] }}</td>
-                        <td class="service">{{ $produks['produk']['harga'] }}</td>
+                        <td class="service">{{ $produks['produk']['harga'] * $produks['quantity'] }}</td>
                     </tr>
                 @endforeach
                 <tr>
                     <td colspan="4">TOTAL</td>
-                    <td class="service">{{ $jumlah_tagihan }}</td>
+                    <td class="service">{{ $data['jumlah_tagihan'] }}</td>
                 </tr>
             </tbody>
         </table>

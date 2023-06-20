@@ -6,7 +6,10 @@ use Exception;
 use Carbon\Carbon;
 use App\Models\Transaksi;
 use Illuminate\Http\Request;
+use InvalidArgumentException;
+use App\Models\Transaksiproduk;
 use App\Services\TransaksiService;
+use Illuminate\Support\Facades\Validator;
 
 class TransaksiController extends Controller
 {
@@ -39,48 +42,51 @@ class TransaksiController extends Controller
             ];
         }
         return response()->json($result);
-        // $data = Transaksi::where('jatuh_tempo', Carbon::today())
-        //                 ->where('status_tagihan', 'Belum Bayar')
-        //                 ->get();
-        // $transaksi = Transaksi::where('jatuh_tempo', Carbon::today())->where('status_tagihan', 'Belum Bayar')->with('pelanggan')->get();
-
-        // // $data = array(
-        // //     'subject'	=> 'Reminder',
-        // //     'no_tagihan'=> $transaksi->no_tagihan,
-        // //     'email'		=> $transaksi->email,
-        // //     'name'	=> $transaksi->name,
-        // //     //Send Request is send_feedback
-        // //     'request'	=> 'send'
-        // // );
-        // foreach ($transaksi as $t) {
-        //     $data = array(
-        //         'subject'   => '$t->subject',
-        //         'no_tagihan'=> $t->no_tagihan,
-        //         'email'     => $t->pelanggan->email,
-        //         'name'      => $t->pelanggan->name,
-        //         //Send Request is send_feedback
-        //         'request'   => 'send'
-        //     );
-        // return $data;
-        // }
+	}
+	public function getInvoice()
+	{
+		$data = Transaksiproduk::with('produk')->with('transaksi')->get();
+        return response()->json($data);
 	}
 
 	public function createTransaksi(Request $request)
-	{
-        $data = $request->all();
-
-        $result = ['status' => 201];
-
-        try {
-            $result['data'] = $this->transaksiService->store($data);
-        } catch (Exception $e) {
-            $result = [
-                'status' =>'422',
-                'error' => $e->getMessage(),
-            ];
+    {
+        $validator = Validator::make($request->all(), [
+            'no_tagihan' => 'required|unique:transaksi,no_tagihan|regex:/^[A-Z]\d{2}$/',
+            'jatuh_tempo' => 'required',
+            'jumlah_tagihan' => 'required',
+            'status_tagihan' => 'required',
+            'pelanggan_id' => 'required',
+            'user_id' => 'required',
+            'produks' => 'required|array'
+        ]);
+        if ($validator->fails()){
+            throw new InvalidArgumentException($validator->errors()->first());
         }
-        return response()->json($result, $result['status']);
-	}
+
+        $transaksi = Transaksi::create([
+            'no_tagihan' => $request->no_tagihan,
+            'jatuh_tempo' => $request->jatuh_tempo,
+            'jumlah_tagihan' => $request->jumlah_tagihan,
+            'status_tagihan' => $request->status_tagihan,
+            'pelanggan_id' => $request->pelanggan_id,
+            'user_id' => $request->user_id,
+        ]);
+
+        $transaksiId = $transaksi->id;
+
+        // Iterasi array produks dan membuat entri baru dalam tabel transaksi_produk
+        foreach ($request->input('produks') as $produkData) {
+            Transaksiproduk::create([
+                'transaksi_id' => $transaksiId,
+                'produk_id' => $produkData['produk_id'],
+                'quantity' => $produkData['quantity'],
+            ]);
+        }
+
+        return response()->json($transaksi);
+    }
+
 
 	public function updateTransaksi(Request $request, $id)
 	{

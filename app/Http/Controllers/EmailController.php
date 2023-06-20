@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+// use PDF;
 use Exception;
 use Carbon\Carbon;
 use App\Mail\SendMail;
 use App\Models\Transaksi;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -102,10 +104,12 @@ class EmailController extends Controller
                 "lastname" => $request->lastname,
                 "address" => $request->address,
                 "no_tagihan" => $request->no_tagihan,
-                "produk" => $request->produk,
                 "jumlah_tagihan" => $request->jumlah_tagihan,
                 "jatuh_tempo" => $request->jatuh_tempo,
+                "produk" => $request->produk,
         ];
+
+        Log::info($data);
 
         $pdf = PDF::loadView('emails.invoice', $data);
         $pdf->setPaper('A4', 'landscape');
@@ -133,15 +137,21 @@ class EmailController extends Controller
                 "lastname" => $request->lastname,
                 "address" => $request->address,
                 "no_tagihan" => $request->no_tagihan,
-                "produk" => $request->produk,
                 "jumlah_tagihan" => $request->jumlah_tagihan,
                 "jatuh_tempo" => $request->jatuh_tempo,
+                "produk" => $request->produk
         ];
 
-        $pdf = PDF::loadView('emails.invoice', $data);
-        $pdf->setPaper('A4', 'landscape');
+        try {
+            $pdf = PDF::loadView('emails.invoice', $data);
+            $pdf->setPaper('A4', 'landscape');
 
-        return $pdf->stream('invoice.pdf');
+            return $pdf->stream('invoice.pdf');
+        } catch (\Exception $e) {
+            error_log($e->getMessage()); // Menampilkan error ke log
+            // Lakukan tindakan lain jika diperlukan, seperti memberikan tanggapan error ke pengguna
+        }
+
     }
     public function reminder() {
         $transaksi = Transaksi::where('jatuh_tempo', Carbon::today())->where('status_tagihan', 'Belum Bayar')->get();
@@ -213,6 +223,37 @@ class EmailController extends Controller
                 "jatuh_tempo" => $tr->jatuh_tempo,
             ];
             return view('emails.invoice', $data);
+        }
+    }
+    public function remind(){
+        $transaksi = Transaksi::where(function($query) {
+            $query->where('status_tagihan', 'Belum Bayar')
+                ->where(function($query) {
+                    $query->whereDate('jatuh_tempo', Carbon::today())
+                        ->orWhereDate('jatuh_tempo', '<=', Carbon::today()->addDay(3))
+                        ->orWhereDate('jatuh_tempo', '<=', Carbon::today()->addDay(7));
+                });
+        })
+        ->with('pelanggan')
+        ->with('user')
+        ->with('transaksi_produk.produk')
+        ->get();
+
+        $data = $transaksi->map(function($item) {
+            return [
+                "email" => $item->user->email,
+                "firstname" => $item->user->firstname,
+                "lastname" => $item->user->lastname,
+                "address" => $item->user->address,
+                "no_tagihan" => $item->no_tagihan,
+                "jumlah_tagihan" => $item->jumlah_tagihan,
+                "jatuh_tempo" => $item->jatuh_tempo,
+                "produk" => $item->transaksi_produk->toArray(),
+            ];
+        })->toArray();
+
+        foreach ($data as $datum) {
+            dd($datum);
         }
     }
 }

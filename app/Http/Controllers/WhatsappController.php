@@ -47,7 +47,7 @@ class WhatsappController extends Controller
                 'countryCode' => '62', //optional
             ),
             CURLOPT_HTTPHEADER => array(
-                'Authorization: 7y!f-nWaCir7YY4!#4Gi' //change TOKEN to your actual token
+                'Authorization: YHGJYEVA4wjNZzFpHCkm' //change TOKEN to your actual token
             ),
         ));
 
@@ -80,7 +80,7 @@ class WhatsappController extends Controller
                 'countryCode' => '62', //optional
             ),
             CURLOPT_HTTPHEADER => array(
-                'Authorization: 7y!f-nWaCir7YY4!#4Gi' //change TOKEN to your actual token
+                'Authorization: YHGJYEVA4wjNZzFpHCkm' //change TOKEN to your actual token
             ),
         ));
 

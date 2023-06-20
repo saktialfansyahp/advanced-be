@@ -2,14 +2,16 @@
 
 namespace App\Console\Commands;
 
+use DateTime;
 use Exception;
 use Carbon\Carbon;
 use App\Mail\SendMail;
+use App\Models\Status;
 use App\Models\Transaksi;
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Mail;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class ReminderEmails extends Command
 {
@@ -34,61 +36,81 @@ class ReminderEmails extends Command
      */
     public function handle()
     {
-        $data["title"] = "From PT.Disty Teknologi Indonesia";
-        $data["body"] = "This is Demo";
+        $currentTime = new DateTime();
+        $time = $currentTime->format("H:i:00");
 
-        $today = Carbon::today();
-        $nextThreeDays = $today->addDays(3);
-        $nextSevenDays = $today->addDays(3);
+        $status = Status::where('name', 'reminder')->first();
 
-        $transaksi = Transaksi::whereDate('jatuh_tempo', $today)
-            ->orWhereDate('jatuh_tempo', '<=', $nextThreeDays)
-            ->orWhereDate('jatuh_tempo', '<=', $nextSevenDays)
-            ->where('status_tagihan', 'Belum Bayar')
+        $daystoadd = $status->daystoadd1;
+        $daystoadd2 = $status->daystoadd2;
+
+        $currentDate = new DateTime();
+        $date = $currentDate->format("Y-m-d");
+
+        $day1 = new DateTime();
+        $day1->modify('+' . $daystoadd . 'days');
+        $day1formatted = $day1->format("Y-m-d");
+
+        $day2 = new DateTime();
+        $day2->modify('+' . $daystoadd2 . 'days');
+        $day2formatted = $day2->format("Y-m-d");
+
+        $transaksi = Transaksi::where('status_tagihan', 'Belum Bayar')
+            ->where('jatuh_tempo', '<=', $date)
+            ->orwhere('jatuh_tempo', $day1formatted)
+            ->orwhere('jatuh_tempo', $day2formatted)
             ->with('pelanggan')
             ->with('user')
+            ->with('transaksi_produk.produk')
             ->get();
 
 
-            // $transaksi = Transaksi::where('jatuh_tempo', Carbon::today())->where('status_tagihan', 'Belum Bayar')->with('pelanggan')->get();
+        $data = $transaksi->map(function($item) {
+            return [
+                "email" => $item->user->email,
+                "firstname" => $item->user->firstname,
+                "lastname" => $item->user->lastname,
+                "address" => $item->user->address,
+                "no_tagihan" => $item->no_tagihan,
+                "jumlah_tagihan" => $item->jumlah_tagihan,
+                "jatuh_tempo" => $item->jatuh_tempo,
+                "produk" => $item->transaksi_produk->toArray(),
+            ];
+        })->toArray();
+
         try {
-            foreach ($transaksi as $trx) {
-                $data["email"] = $trx->user->email;
-                $data["firstname"] = $trx->user->firstname;
-                $data["lastname"] = $trx->user->lastname;
-                $data["address"] = $trx->user->address;
-                $data["no_tagihan"] = $trx->no_tagihan;
-                $data["produk"] = $trx->produk;
-                $data["jumlah_tagihan"] = $trx->jumlah_tagihan;
-                $data["jatuh_tempo"] = $trx->jatuh_tempo;
+            if($time == $status->time){
+                echo $date;
+                $status = Status::where('name', 'reminder')->first();
+                Log::info($status);
+                $statuses = []; // Array to store email sending statuses
 
-                $pdf = PDF::loadView('emails.invoice', $data);
-                $pdf->setPaper('A4', 'landscape');
+                foreach ($data as $datum) {
+                    Log::info($datum);
+                    $pdf = PDF::loadView('emails.invoices', ['data' => $datum]);
+                    $pdf->setPaper('A4', 'landscape');
 
-                $mail = Mail::send('emails.mail', $data, function($message) use ($data, $pdf) {
-                    $message->to($data["email"], $data["firstname"])
-                    ->subject($data["title"])
-                    ->attachData($pdf->output(), "Invoice.pdf");
-                });
-                Log::info(json_encode($mail));
-                Log::info(json_encode($transaksi));
+
+                    $mail = Mail::send('emails.mail', $datum, function($message) use ($datum, $pdf) {
+                        $message->to($datum["email"], $datum["firstname"])
+                            ->subject('Reminder')
+                            ->attachData($pdf->output(), "Invoice.pdf");
+                    });
+
+                    if ($mail) {
+                        $statuses[] = 200; // Save email sending status as 200 (Success)
+                    } else {
+                        $statuses[] = 400; // Save email sending status as 400 (Failed)
+                    }
+                }
+                return $statuses;
+
+                Log::info($statuses);
+            } else {
+                echo "Tidak ada pengingat Email saat ini\n";
             }
         } catch (Exception $e) {
-            //Give response message error if failed to send email
-            Log::info($e);
-            response()->json([$e->getMessage()]);
+            Log::info($e->getMessage());
         }
-
-        // foreach ($transaksi as $t) {
-        //     $data = array(
-        //         'subject'   => $t->subject,
-        //         'no_tagihan'=> $t->no_tagihan,
-        //         'email'     => $t->pelanggan->email,
-        //         'name'      => $t->pelanggan->name,
-        //         //Send Request is send_feedback
-        //         'request'   => 'send'
-        //     );
-
-        // }
     }
 }
